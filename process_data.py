@@ -1,4 +1,10 @@
+# For executing it I´ve ran this
+# python process_data.py messages.csv categories.csv sqlite:///NaturalDisastersMsgs.db
+
 import sys
+import numpy as np
+import pandas as pd
+from sqlalchemy import create_engine
 
 
 def load_data(messages_filepath, categories_filepath):
@@ -26,15 +32,16 @@ def load_data(messages_filepath, categories_filepath):
     # Replace categories column in df with new category columns
     df = df.drop(['categories'], axis=1)
     df = df.join(categories)
+    return df
 
 
 def clean_data(df):
-    #Remove duplicates
     df = df.drop_duplicates()
-
+    return df
 
 def save_data(df, database_filename):
-    engine = create_engine('sqlite:///NaturalDisastersMsgs.db')
+    engine = create_engine(database_filename)
+#     engine = create_engine('sqlite:///NaturalDisastersMsgs.db')
     df.to_sql('Messages', engine, index=False)  
 
 
@@ -46,7 +53,7 @@ def main():
         print('Loading data...\n    MESSAGES: {}\n    CATEGORIES: {}'
               .format(messages_filepath, categories_filepath))
         df = load_data(messages_filepath, categories_filepath)
-
+        
         print('Cleaning data...')
         df = clean_data(df)
         
