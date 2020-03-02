@@ -52,58 +52,42 @@ def tokenize(text):
     return clean_tokens
 
 
-def build_model():
-    X, y = load_data()
-    X_train, X_test, y_train, y_test = train_test_split(X, y)
-
-    model = Pipeline([
-        ('vect', CountVectorizer(tokenizer=tokenize)),
-        ('tfidf', TfidfTransformer()),
-        ('clf', MultiOutputClassifier(tree.DecisionTreeClassifier()))
-    ])
-    
-
-
-
-def evaluate_model(model, X_test, Y_test):
-    y_pred = pipeline.predict(X_test)
-    
-    f1_scores = []
-    for i in range(len(Y_test.columns)):
-        print(Y_test.columns[i])
-        f1 = f1_score(Y_test.values[:,i], y_pred[:,i], average='weighted')
-        f1_scores.append(f1)
-        print(classification_report(y_test.values[:,i], y_pred[:,i]))
-    print("The average f1 weighted score of all the columns is", np.mean(f1_scores))
-
-
-def save_model(model, model_filepath):
-    pickle.dump(pipeline, open('finalized_model.sav', 'wb'))
-
-
 def main():
     if len(sys.argv) == 3:
         database_filepath, model_filepath = sys.argv[1:]
         print('Loading data...\n    DATABASE: {}'.format(database_filepath))
-        X, Y, category_names = load_data(table_name, database_filepath)
+        X, Y = load_data('Messages', database_filepath)
         X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2)
         
         print('Building model...')
-        model = build_model()
+        pipe = Pipeline([
+            ('vect', CountVectorizer(tokenizer=tokenize)),
+            ('tfidf', TfidfTransformer()),
+            ('clf', MultiOutputClassifier(tree.DecisionTreeClassifier()))
+        ])
         
-        print('Training model...')
-        model.fit(X_train, Y_train)
+        print('Training model...')   
+        pipe.fit(X_train, Y_train)
+
         
         print('Evaluating model...')
-        evaluate_model(model, X_test, Y_test)
+        y_pred = pipe.predict(X_test)
+    
+        f1_scores = []
+        for i in range(len(Y_test.columns)):
+            print(Y_test.columns[i])
+            f1 = f1_score(Y_test.values[:,i], y_pred[:,i], average='weighted')
+            f1_scores.append(f1)
+            print(classification_report(Y_test.values[:,i], y_pred[:,i]))
+        print("The average f1 weighted score of all the columns is", np.mean(f1_scores))
 
         print('Saving model...\n    MODEL: {}'.format(model_filepath))
-        save_model(model, model_filepath)
+        pickle.dump(pipe, open(model_filepath, 'wb'))
 
         print('Trained model saved!')
 
     else:
-        print('Please provide the filepath of the disaster messages database '\
+        print('Please provide the file path of the disaster messages database '\
               'as the first argument and the filepath of the pickle file to '\
               'save the model to as the second argument. \n\nExample: python '\
               'train_classifier.py ../data/DisasterResponse.db classifier.pkl')
