@@ -14,9 +14,21 @@
 
 ## ETL_Pipeline_Preparation
 
-> The final dataframe is prepared from both initial dataframes and saved the result to a sqllite databes
+> The final dataframe is prepared from both initial dataframes and saved the result to a sqllite databese
+
+> A py file was created process_data.py and for executing it I´ve ran 
+
+> python process_data.py messages.csv categories.csv sqlite:///NaturalDisastersMsgs.db
 
 ## ML_Pipeline_Preparation
 
 > The pipeline for building the machine learning algorithm is prepared in this section.
+
+> A py file was created train_classifier.py and for executing it I´ve ran
+
+> python train_classifier.py sqlite:///NaturalDisastersMsgs.db classifier.pkl
+
+## Run.py
+
+> For a web simulation it´s been created the Run.py
 
